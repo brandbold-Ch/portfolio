@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portfolio Backend</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            /* slate-50 */
+            --panel: #ffffff;
+            /* white */
+            --card: #f1f5f9;
+            /* slate-100 */
+            --text: #0f172a;
+            /* slate-900 */
+            --muted: #475569;
+            /* slate-600 */
+            --accent: #2563eb;
+            /* blue-600 */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(180deg, var(--bg), #020617);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        header {
+            padding: 4rem 1.5rem 3rem;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header h1 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+        }
+
+        header p {
+            margin-top: 1rem;
+            max-width: 700px;
+            color: var(--muted);
+        }
+
+        section {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--accent);
+            padding-left: 0.75rem;
+        }
+
+        .about {
+            display: grid;
+            gap: 1.5rem;
+            background: var(--panel);
+            border-radius: 12px;
+            padding: 2rem;
+        }
+
+        .about strong {
+            color: var(--accent);
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .project-card {
+            background: var(--card);
+            border-radius: 14px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .project-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+        }
+
+        .project-image {
+            position: relative;
+            height: 180px;
+            background: #e5e7eb;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+
+        .carousel {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.3s ease;
+        }
+
+        .carousel img {
+            min-width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+
+        .carousel-controls {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 0.5rem;
+            pointer-events: none;
+        }
+
+        .carousel-controls button {
+            pointer-events: all;
+            background: rgba(15, 23, 42, 0.6);
+            border: none;
+            color: #fff;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .project-body {
+            padding: 1.25rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .project-body h3 {
+            font-size: 1.1rem;
+        }
+
+        .project-body p {
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .project-meta {
+            margin-top: auto;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .project-links {
+            margin-top: 0.75rem;
+        }
+
+        .project-links a {
+            display: inline-block;
+            text-decoration: none;
+            color: var(--accent);
+            font-size: 0.9rem;
+            margin-right: 1rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 1.5rem 3rem;
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding-top: 3rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Brandon Jared Molina Vázquez — Ingeniero de Software</h1>
+
+        <h3 style="margin-top: 1rem; font-weight: 600; color: var(--muted);">Quién soy</h3>
+
+        <div class="about" style="margin-top: 0.5rem;">
+            <p>
+                Ingeniero de software enfocado en desarrollo backend, con interés en entender los sistemas
+                desde sus capas más fundamentales. Disfruto escarbar en lo primitivo: cómo fluyen los datos,
+                cómo se estructuran los protocolos y cómo pequeñas decisiones impactan la estabilidad
+                y mantenibilidad de un sistema.
+            </p>
+            <p>
+                Trabajo principalmente en la construcción de APIs REST y servicios backend utilizando
+                Python con FastAPI y Flask, manejando bases de datos relacionales y NoSQL
+                como PostgreSQL, MongoDB y Redis. Me enfoco en validación de datos, diseño claro de endpoints
+                y código predecible.
+            </p>
+            <p>
+                Aunque Python es mi base actual, mantengo una mentalidad abierta y adaptable:
+                me interesa aprender y trabajar con otros lenguajes y tecnologías backend,
+                como Java y distintos ecosistemas, según las necesidades del proyecto.
+            </p>
+        </div>
+
+        <div style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 1rem;">
+            <a href="https://github.com/brandbold-Ch" target="_blank"
+                style="color: var(--accent); text-decoration: none; font-weight: 500;">GitHub</a>
+            <a href="mailto:jaredbrandon970@gmail.com"
+                style="color: var(--accent); text-decoration: none; font-weight: 500;">Correo</a>
+        </div>
+    </header>
+
+
+
+    <section>
+        <h2 class="section-title">Proyectos Backend</h2>
+
+        <div class="projects-grid">
+
+            <article class="project-card">
+                <div class="project-image">
+                    <div class="carousel">
+                        <img src="https://res.cloudinary.com/dwq8pacid/image/upload/v1769453782/mar2_dy89dq.png" alt="Captura 1" />
+                        <img src="https://res.cloudinary.com/dwq8pacid/image/upload/v1769453772/mar1_fucfau.png" alt="Captura 2" />
+                        <img src="https://res.cloudinary.com/dwq8pacid/image/upload/v1769454948/mar3_jaekcl.png" alt="Captura 3">
+
+                    </div>
+                    <div class="carousel-controls">
+                        <button onclick="moveCarousel(this, -1)">‹</button>
+                        <button onclick="moveCarousel(this, 1)">›</button>
+                    </div>
+                </div>
+                <div class="project-body">
+                    <h3>Clínica Veterinaria MARVIC</h3>
+                    <p>
+                        Desarrollo de un sistema backend para la gestión de una clínica veterinaria.
+                        Implementé una API REST con FastAPI y PostgreSQL,
+                        enfocada en validación de datos, diseño claro de endpoints
+                        y consistencia de la información.
+                    </p>
+                    <div class="project-meta">
+                        Rol: Desarrollo backend, arquitectura REST y cron jobs con Redis
+                    </div>
+                    <div class="project-links">
+                        <a href="git@github.com:brandbold-Ch/Marvic_API_REST.git" target="_blank">Repositorio Git</a>
+                    </div>
+                </div>
+            </article>
+
+            <article class="project-card">
+                <div class="project-image">
+                    <div class="carousel">
+                        <img src="https://res.cloudinary.com/dwq8pacid/image/upload/v1769454958/pet4_jf9qo8.png" alt="Captura 1">
+                        <img src="https://res.cloudinary.com/dwq8pacid/image/upload/v1769454542/pet1_dphhk3.png" alt="Captura 2" />
+                        <img src="https://res.cloudinary.com/dwq8pacid/image/upload/v1769454542/pet2_vzknni.png" alt="Captura 3" />
+                        <img src="https://res.cloudinary.com/dwq8pacid/image/upload/v1769454543/pet3_ynyyzq.png" alt="Captura 4" />
+                    </div>
+                    <div class="carousel-controls">
+                        <button onclick="moveCarousel(this, -1)">‹</button>
+                        <button onclick="moveCarousel(this, 1)">›</button>
+                    </div>
+                </div>
+                <div class="project-body">
+                    <h3>PET (Perdidos En Tapachula)</h3>
+                    <p>
+                        Desarrollo de servicios backend con FastAPI y MongoDB,
+                        orientados al manejo de datos no relacionales.
+                        Incluyó el modelado de documentos y la optimización
+                        de consultas para mejorar el rendimiento.
+                    </p>
+                    <div class="project-meta">
+                        Rol: Backend developer y diseño de modelos de datos
+                    </div>
+                    <div class="project-links">
+                        <a href="git@github.com:brandbold-Ch/api-pets.git" target="_blank">Repositorio Git</a>
+                    </div>
+                </div>
+            </article>
+
+            <article class="project-card">
+                <div class="project-image">
+                    <div class="carousel">
+                        <img src="https://res.cloudinary.com/dwq8pacid/image/upload/v1769454972/co2_zky7nw.png" alt="Captura 1" />
+                        <img src="https://res.cloudinary.com/dwq8pacid/image/upload/v1769455235/co1_bf7bxq.png" alt="Captura 2" />
+                    </div>
+                    <div class="carousel-controls">
+                        <button onclick="moveCarousel(this, -1)">‹</button>
+                        <button onclick="moveCarousel(this, 1)">›</button>
+                    </div>
+                </div>
+                <div class="project-body">
+                    <h3>COBACH 217 Soconusco</h3>
+                    <p>
+                        Migración de una base de datos heredada en Visual FoxPro
+                        hacia MongoDB.
+                        Reestructuré los datos y adapté el modelo para un entorno moderno,
+                        mejorando mantenibilidad y escalabilidad del sistema.
+                    </p>
+                    <div class="project-meta">
+                        Rol: Migración de datos y optimización estructural
+                    </div>
+                    <div class="project-links">
+                        <a href="git@github.com:brandbold-Ch/APIBoletas.git" target="_blank">Repositorio Git</a>
+                    </div>
+                </div>
+            </article>
+
+            <article class="project-card">
+                <div class="project-image">
+                    <div class="carousel">
+                        <img src="https://res.cloudinary.com/dwq8pacid/image/upload/v1769456299/Captura_desde_2026-01-26_13-36-01_a3sbfp.png" alt="Captura 1" />
+                        <img src="https://res.cloudinary.com/dwq8pacid/image/upload/v1769456301/Captura_desde_2026-01-26_13-36-43_etbkad.png" alt="Captura 2" />
+                        <img src="https://res.cloudinary.com/dwq8pacid/image/upload/v1769456302/Captura_desde_2026-01-26_13-37-01_o75fcy.png" alt="Captura 3" />
+                    </div>
+                    <div class="carousel-controls">
+                        <button onclick="moveCarousel(this, -1)">‹</button>
+                        <button onclick="moveCarousel(this, 1)">›</button>
+                    </div>
+                </div>
+                <div class="project-body">
+                    <h3>BOCADOS – Backend Service</h3>
+                    <p>
+                        Desarrollo del backend para un sistema de gestión,
+                        utilizando Flask y SQLModel.
+                        Diseñé la arquitectura base del proyecto,
+                        implementando paginación, rutas dinámicas
+                        y una estructura extensible.
+                    </p>
+                    <div class="project-meta">
+                        Rol: Diseño de arquitectura backend e implementación
+                    </div>
+                    <div class="project-links">
+                        <a href="git@github.com:PABED-DEV/bocados.git" target="_blank">Repositorio Git</a>
+                    </div>
+                </div>
+            </article>
+        </div>
+        </article>
+        </div>
+    </section>
+
+    <footer>
+        © 2026 Brandbold
+    </footer>
+
+    <script>
+        function moveCarousel(button, direction) {
+            const projectImage = button.closest('.project-image');
+            const carousel = projectImage.querySelector('.carousel');
+            const images = carousel.children.length;
+
+            let index = parseInt(carousel.dataset.index || '0', 10);
+            index = (index + direction + images) % images;
+
+            carousel.dataset.index = index;
+            carousel.style.transform = `translateX(-${index * 100}%)`;
+        }
+    </script>
+
+</body>
+
+</html>
