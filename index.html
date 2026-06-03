@@ -349,10 +349,18 @@
     </section>
 
     <footer>
-        <div id="visitor" style="display:flex;flex-direction:column;gap:6px;align-items:center;">
+        <div id="visitor" style="display:flex;flex-direction:column;gap:8px;align-items:center;">
             <div style="font-weight:600;">© 2026 Brandbold</div>
-            <div id="visitor-counter" style="color:var(--muted);font-size:0.95rem;margin-top:0.5rem;">Visitantes: —</div>
-            <div id="visitor-ip" style="color:var(--muted);font-size:0.8rem;">IP: —</div>
+            <div id="visitor-badge" style="display:flex;align-items:center;gap:10px;">
+                <div id="visitor-counter" style="background:linear-gradient(90deg,var(--accent),#34d399);color:white;padding:8px 14px;border-radius:999px;font-weight:700;box-shadow:0 8px 28px rgba(14,165,164,0.12);">Visitantes: —</div>
+                <div id="visitor-status" style="color:var(--muted);font-size:0.9rem;"></div>
+            </div>
+            <div id="visitor-ip" style="color:var(--muted);font-size:0.85rem;">IP: —</div>
+            <div style="display:flex;gap:8px;margin-top:6px;">
+                <button id="show-ips" style="background:transparent;border:1px solid var(--accent);color:var(--accent);padding:6px 10px;border-radius:8px;cursor:pointer;">Mostrar visitantes</button>
+                <button id="reset-count" style="background:var(--accent);color:white;padding:6px 10px;border-radius:8px;border:none;cursor:pointer;">Reset</button>
+            </div>
+            <div id="ips-list" style="max-width:680px;word-break:break-word;color:var(--muted);font-size:0.85rem;display:none;margin-top:6px;padding:8px 12px;border-radius:8px;background:rgba(14,165,164,0.03);"></div>
         </div>
     </footer>
 
@@ -388,64 +396,121 @@
             }
         }, {capture: true});
 
-        // Visitor counter using local server (count.json) - POST /count/hit and GET /count
+        // Visitor counter using Node endpoints when available, with UI flair
         (function () {
             const counterEl = document.getElementById('visitor-counter');
             const ipEl = document.getElementById('visitor-ip');
+            const statusEl = document.getElementById('visitor-status');
+            const ipsListEl = document.getElementById('ips-list');
+            const showIpsBtn = document.getElementById('show-ips');
+            const resetBtn = document.getElementById('reset-count');
 
             function setCount(value) {
                 counterEl.textContent = 'Visitantes: ' + value;
             }
 
-            async function initCounter() {
-                try {
-                    // attempt to POST a hit; server will deduplicate by IP
-                    const res = await fetch('/count/hit', { method: 'POST' });
-                    const js = await res.json();
-                    if (js && typeof js.count !== 'undefined') setCount(js.count);
-                    ipEl.textContent = 'IP: ' + (js.ip || '—');
+            function pulse(el) {
+                el.animate([
+                    { transform: 'scale(1)', boxShadow: '0 8px 28px rgba(14,165,164,0.12)' },
+                    { transform: 'scale(1.06)', boxShadow: '0 16px 48px rgba(14,165,164,0.18)' },
+                    { transform: 'scale(1)', boxShadow: '0 8px 28px rgba(14,165,164,0.12)' }
+                ], { duration: 700, iterations: 1 });
+            }
 
-                    // record seen IP locally to avoid extra POST attempts from same browser (optional)
-                    try {
-                        let seen = JSON.parse(localStorage.getItem('seen_ips') || '[]');
-                        if (js.ip && !seen.includes(js.ip)) {
-                            seen.push(js.ip);
-                            localStorage.setItem('seen_ips', JSON.stringify(seen));
-                        }
-                    } catch (e) { }
-                } catch (e) {
-                    // fallback: try GET
-                    try {
-                        const r = await fetch('/count');
-                        const j = await r.json();
-                        if (j && typeof j.count !== 'undefined') setCount(j.count);
-                    } catch (e2) {
-                        setCount('—');
+            async function registerHit() {
+                try {
+                    const res = await fetch('/count/hit', { method: 'POST' });
+                    if (!res.ok) throw new Error('no server');
+                    const js = await res.json();
+                    setCount(js.count);
+                    ipEl.textContent = 'IP: ' + (js.ip || '—');
+                    if (js.added) {
+                        statusEl.textContent = 'Gracias — tu visita fue registrada';
+                        pulse(counterEl);
+                    } else {
+                        statusEl.textContent = 'Tu IP ya estaba registrada';
                     }
-                    ipEl.textContent = 'IP: —';
+                    return true;
+                } catch (e) {
+                    return false;
                 }
             }
 
-            initCounter();
-        }());
-        // small UI/color/responsive tweaks applied at runtime (optional)
-        (function () {
-        (function () {
+            async function fetchCountFallback() {
+                try {
+                    const r = await fetch('/count', { cache: 'no-store' });
+                    if (!r.ok) throw new Error('no server');
+                    const j = await r.json();
+                    setCount(j.count || 0);
+                    statusEl.textContent = 'Conectado (solo lectura)';
+                    return true;
+                } catch (e) {
+                    // try reading static count.json if present
+                    try {
+                        const r2 = await fetch('count.json', { cache: 'no-store' });
+                        if (r2.ok) {
+                            const j2 = await r2.json();
+                            setCount((j2 && j2.count) || 0);
+                            statusEl.textContent = 'Lectura desde count.json';
+                            return true;
+                        }
+                    } catch (e2) { }
+                    // fallback to client-only stored count
+                    const local = parseInt(localStorage.getItem('local_visitors') || '0', 10) || 0;
+                    setCount(local);
+                    statusEl.textContent = 'Modo offline (solo local)';
+                    return false;
+                }
+            }
+
+            // initialize
+            (async function init() {
+                const ok = await registerHit();
+                if (!ok) await fetchCountFallback();
+            })();
+
+            showIpsBtn.addEventListener('click', async () => {
+                if (ipsListEl.style.display === 'block') { ipsListEl.style.display = 'none'; return; }
+                try {
+                    const r = await fetch('/count/ips', { cache: 'no-store' });
+                    if (!r.ok) throw new Error('no');
+                    const j = await r.json();
+                    ipsListEl.style.display = 'block';
+                    ipsListEl.textContent = `Visitantes únicos: ${j.count}\n` + (Array.isArray(j.ips) ? j.ips.slice(-50).reverse().join('\n') : '—');
+                } catch (e) {
+                    ipsListEl.style.display = 'block';
+                    ipsListEl.textContent = 'No se pudo obtener la lista desde el servidor.';
+                }
+            });
+
+            resetBtn.addEventListener('click', async () => {
+                const token = prompt('Admin token para resetear contador (oculto en servidor):');
+                if (!token) return;
+                try {
+                    const r = await fetch('/count/reset', { method: 'POST', headers: { 'x-admin-token': token } });
+                    if (!r.ok) throw new Error('no');
+                    const j = await r.json();
+                    if (j && j.ok) {
+                        setCount(0);
+                        statusEl.textContent = 'Contador reseteado';
+                        ipsListEl.style.display = 'none';
+                        alert('Contador reseteado correctamente.');
+                    }
+                } catch (e) {
+                    alert('Fallo al resetear: token inválido o servidor inaccesible.');
+                }
+            });
+
+            // small UI tweaks: style project links and initialize carousels
             document.querySelectorAll('.project-links a').forEach(a => {
-            document.querySelectorAll('.project-links a').forEach(a => {
-                a.style.padding = '6px 10px';
                 a.style.padding = '6px 10px';
                 a.style.borderRadius = '8px';
                 a.style.display = 'inline-block';
+                a.style.background = 'rgba(14,165,164,0.06)';
+                a.style.color = 'var(--accent)';
             });
-
-            // ensure carousels initialize index
             document.querySelectorAll('.carousel').forEach(c => { c.dataset.index = 0; c.style.transform = 'translateX(0%)'; });
-
-            // subtle card shadows for a professional light look
-            document.querySelectorAll('.project-card').forEach(card => {
-                card.style.boxShadow = '0 6px 18px rgba(15, 23, 42, 0.06)';
-            });
+            document.querySelectorAll('.project-card').forEach(card => { card.style.boxShadow = '0 6px 18px rgba(15, 23, 42, 0.06)'; });
         }());
     </script>
 
