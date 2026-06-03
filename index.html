@@ -7,18 +7,12 @@
     <title>Portfolio Backend</title>
     <style>
         :root {
-            --bg: #f8fafc;
-            /* slate-50 */
-            --panel: #ffffff;
-            /* white */
-            --card: #f1f5f9;
-            /* slate-100 */
-            --text: #0f172a;
-            /* slate-900 */
-            --muted: #475569;
-            /* slate-600 */
-            --accent: #2563eb;
-            /* blue-600 */
+            --bg: #fbfdff; /* very light */
+            --panel: #ffffff; /* white */
+            --card: #f7fbfa; /* subtle off-white */
+            --text: #07243b; /* deep blue for text */
+            --muted: #556774; /* soft gray-blue */
+            --accent: #0ea5a4; /* teal accent */
         }
 
         * {
@@ -29,7 +23,7 @@
 
         body {
             font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(180deg, var(--bg), #020617);
+            background: linear-gradient(180deg, var(--bg), #edf8f9);
             color: var(--text);
             line-height: 1.6;
         }
@@ -394,63 +388,64 @@
             }
         }, {capture: true});
 
-        // Visitor counter using CountAPI (https://countapi.xyz) + localStorage to avoid duplicate increments per IP on this browser
+        // Visitor counter using local server (count.json) - POST /count/hit and GET /count
         (function () {
             const counterEl = document.getElementById('visitor-counter');
             const ipEl = document.getElementById('visitor-ip');
-            const namespace = 'brandbold-portfolio';
-            const key = 'visits';
-            const getUrl = `https://api.countapi.xyz/get/${namespace}/${key}`;
-            const hitUrl = `https://api.countapi.xyz/hit/${namespace}/${key}`;
 
             function setCount(value) {
                 counterEl.textContent = 'Visitantes: ' + value;
             }
 
-            function fetchCount() {
-                fetch(getUrl).then(r => r.json()).then(js => {
-                    if (js && typeof js.value !== 'undefined') setCount(js.value);
-                }).catch(() => setCount('—'));
+            async function initCounter() {
+                try {
+                    // attempt to POST a hit; server will deduplicate by IP
+                    const res = await fetch('/count/hit', { method: 'POST' });
+                    const js = await res.json();
+                    if (js && typeof js.count !== 'undefined') setCount(js.count);
+                    ipEl.textContent = 'IP: ' + (js.ip || '—');
+
+                    // record seen IP locally to avoid extra POST attempts from same browser (optional)
+                    try {
+                        let seen = JSON.parse(localStorage.getItem('seen_ips') || '[]');
+                        if (js.ip && !seen.includes(js.ip)) {
+                            seen.push(js.ip);
+                            localStorage.setItem('seen_ips', JSON.stringify(seen));
+                        }
+                    } catch (e) { }
+                } catch (e) {
+                    // fallback: try GET
+                    try {
+                        const r = await fetch('/count');
+                        const j = await r.json();
+                        if (j && typeof j.count !== 'undefined') setCount(j.count);
+                    } catch (e2) {
+                        setCount('—');
+                    }
+                    ipEl.textContent = 'IP: —';
+                }
             }
 
-            // get visitor IP (best-effort)
-            fetch('https://api.ipify.org?format=json').then(r => r.json()).then(data => {
-                const ip = data.ip || 'desconocida';
-                ipEl.textContent = 'IP: ' + ip;
-
-                // load seen IPs from localStorage (note: this is local to the browser)
-                let seen = [];
-                try { seen = JSON.parse(localStorage.getItem('seen_ips') || '[]'); } catch (e) { seen = []; }
-
-                if (!seen.includes(ip)) {
-                    // increment remote counter once for this IP (as seen from this browser)
-                    fetch(hitUrl).then(r => r.json()).then(js => {
-                        if (js && typeof js.value !== 'undefined') setCount(js.value);
-                        seen.push(ip);
-                        try { localStorage.setItem('seen_ips', JSON.stringify(seen)); } catch (e) { }
-                    }).catch(() => {
-                        fetchCount();
-                    });
-                } else {
-                    // already seen on this browser; just read count
-                    fetchCount();
-                }
-            }).catch(() => {
-                ipEl.textContent = 'IP: —';
-                fetchCount();
-            });
+            initCounter();
         }());
-n        // small UI/color/responsive tweaks applied at runtime (optional)
+        // small UI/color/responsive tweaks applied at runtime (optional)
         (function () {
-            // improve link look
+        (function () {
             document.querySelectorAll('.project-links a').forEach(a => {
-                a.style.background = 'rgba(37,99,235,0.08)';
+            document.querySelectorAll('.project-links a').forEach(a => {
+                a.style.padding = '6px 10px';
                 a.style.padding = '6px 10px';
                 a.style.borderRadius = '8px';
                 a.style.display = 'inline-block';
             });
-n            // ensure carousels initialize index
+
+            // ensure carousels initialize index
             document.querySelectorAll('.carousel').forEach(c => { c.dataset.index = 0; c.style.transform = 'translateX(0%)'; });
+
+            // subtle card shadows for a professional light look
+            document.querySelectorAll('.project-card').forEach(card => {
+                card.style.boxShadow = '0 6px 18px rgba(15, 23, 42, 0.06)';
+            });
         }());
     </script>
 
