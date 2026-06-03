@@ -23,7 +23,7 @@
 
         body {
             font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(180deg, var(--bg), #edf8f9);
+            background: linear-gradient(180deg, #f0fff4, #e6fff6); /* tender green gradient */
             color: var(--text);
             line-height: 1.6;
         }
@@ -181,6 +181,18 @@
                 padding-top: 3rem;
             }
         }
+
+        /* Lightbox styles */
+        #lightbox{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:radial-gradient(rgba(2,6,23,0.55),rgba(2,6,23,0.8));z-index:1200}
+        #lightbox[aria-hidden="false"]{display:flex}
+        #lb-image-wrap{max-width:92%;max-height:82%;display:flex;align-items:center;justify-content:center}
+        #lb-image{max-width:100%;max-height:100%;border-radius:8px;box-shadow:0 20px 60px rgba(2,6,23,0.6)}
+        #lb-close,#lb-prev,#lb-next{position:fixed;background:transparent;border:none;color:white;font-size:26px;cursor:pointer;padding:8px;border-radius:8px}
+        #lb-close{top:20px;right:24px;font-size:28px}
+        #lb-prev{left:20px;top:50%;transform:translateY(-50%);font-size:40px}
+        #lb-next{right:20px;top:50%;transform:translateY(-50%);font-size:40px}
+        @media (max-width:600px){#lb-prev,#lb-next{font-size:30px;left:8px;right:8px}}
+        
     </style>
 </head>
 
@@ -363,6 +375,13 @@
             <div id="ips-list" style="max-width:680px;word-break:break-word;color:var(--muted);font-size:0.85rem;display:none;margin-top:6px;padding:8px 12px;border-radius:8px;background:rgba(14,165,164,0.03);"></div>
         </div>
     </footer>
+    <!-- Lightbox markup -->
+    <div id="lightbox" aria-hidden="true">
+      <button id="lb-close" aria-label="Cerrar">×</button>
+      <button id="lb-prev" aria-label="Anterior">‹</button>
+      <div id="lb-image-wrap"><img id="lb-image" src="" alt=""/></div>
+      <button id="lb-next" aria-label="Siguiente">›</button>
+    </div>
 
     <script>
         // Carousel movement (existing)
@@ -511,6 +530,38 @@
             });
             document.querySelectorAll('.carousel').forEach(c => { c.dataset.index = 0; c.style.transform = 'translateX(0%)'; });
             document.querySelectorAll('.project-card').forEach(card => { card.style.boxShadow = '0 6px 18px rgba(15, 23, 42, 0.06)'; });
+        }());
+
+        // Lightbox handlers
+        (function(){
+            const lb = document.getElementById('lightbox');
+            const lbImg = document.getElementById('lb-image');
+            const lbClose = document.getElementById('lb-close');
+            const lbPrev = document.getElementById('lb-prev');
+            const lbNext = document.getElementById('lb-next');
+            let currentImages = [];
+            let idx = 0;
+            function openLB(images, i){ currentImages = images; idx = i; lbImg.src = images[i]; lb.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
+            function closeLB(){ lb.setAttribute('aria-hidden','true'); document.body.style.overflow=''; lbImg.src = ''; }
+            function showAt(n){ idx = (n + currentImages.length) % currentImages.length; lbImg.src = currentImages[idx]; }
+            lbClose.addEventListener('click', closeLB);
+            lbPrev.addEventListener('click', ()=> showAt(idx-1));
+            lbNext.addEventListener('click', ()=> showAt(idx+1));
+            lb.addEventListener('click', (e)=> { if (e.target === lb) closeLB(); });
+            document.addEventListener('keydown', (e)=> { if (lb.getAttribute('aria-hidden') === 'false') { if (e.key === 'Escape') closeLB(); if (e.key === 'ArrowLeft') showAt(idx-1); if (e.key === 'ArrowRight') showAt(idx+1); } });
+            // touch support for swipe
+            let startX = 0;
+            lbImg.addEventListener('touchstart', (e)=> { startX = e.touches[0].clientX; });
+            lbImg.addEventListener('touchend', (e)=> { const dx = e.changedTouches[0].clientX - startX; if (dx > 40) showAt(idx-1); else if (dx < -40) showAt(idx+1); });
+
+            // attach click handlers to each carousel image group
+            document.querySelectorAll('.carousel').forEach(car => {
+                const imgs = Array.from(car.querySelectorAll('img')).map(i=>i.src);
+                car.querySelectorAll('img').forEach((imgEl, i)=>{
+                    imgEl.style.cursor = 'zoom-in';
+                    imgEl.addEventListener('click', ()=> openLB(imgs, i));
+                });
+            });
         }());
     </script>
 
