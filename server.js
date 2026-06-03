@@ -36,9 +36,7 @@ app.post('/count/hit', (req, res) => {
   if (forwarded) ip = forwarded.split(',')[0].trim();
   else ip = req.socket.remoteAddress || '';
   // normalize IPv4-mapped IPv6
-  if (ip.startsWith('::ffff:')) ip = ip.replace('::ffff:', '');
-
-  const force = String((req.query && req.query.force) || '').toLowerCase();
+  if (ip && ip.startsWith('::ffff:')) ip = ip.replace('::ffff:', '');
 
   const data = readCount();
   if (!Array.isArray(data.ips)) data.ips = [];
@@ -46,21 +44,15 @@ app.post('/count/hit', (req, res) => {
 
   const already = ip && data.ips.includes(ip);
 
-  if (force === '1' || force === 'true') {
-    // always increment (used for local testing); still record ip if missing
-    if (ip && !data.ips.includes(ip)) data.ips.push(ip);
-    data.count = (data.count || 0) + 1;
-    try { writeCount(data); } catch (e) { console.error('Failed writing count.json', e); }
-    return res.json({ count: data.count, ip, added: true, forced: true });
-  }
-
   if (!already) {
     if (ip) data.ips.push(ip);
     data.count = (data.count || 0) + 1;
     try { writeCount(data); } catch (e) { console.error('Failed writing count.json', e); }
+    return res.json({ count: data.count, ip, added: true });
   }
 
-  res.json({ count: data.count, ip, added: !already });
+  // IP already registered, do not increment
+  return res.json({ count: data.count, ip, added: false });
 });
 
 // Return the list of IPs (admin)

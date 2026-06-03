@@ -461,9 +461,7 @@
 
             async function registerHit() {
                 try {
-                    // if local dev, force increment so repeated visits increase counter for testing
-                    const forceParam = (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1') ? '?force=1' : '';
-                    const res = await fetch('/count/hit' + forceParam, { method: 'POST' });
+                    const res = await fetch('/count/hit', { method: 'POST' });
                     if (!res.ok) throw new Error('no server');
                     const js = await res.json();
                     setCount(js.count);
