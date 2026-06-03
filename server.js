@@ -38,13 +38,24 @@ app.post('/count/hit', (req, res) => {
   // normalize IPv4-mapped IPv6
   if (ip.startsWith('::ffff:')) ip = ip.replace('::ffff:', '');
 
+  const force = String((req.query && req.query.force) || '').toLowerCase();
+
   const data = readCount();
   if (!Array.isArray(data.ips)) data.ips = [];
   if (typeof data.count !== 'number') data.count = 0;
 
-  const already = data.ips.includes(ip);
+  const already = ip && data.ips.includes(ip);
+
+  if (force === '1' || force === 'true') {
+    // always increment (used for local testing); still record ip if missing
+    if (ip && !data.ips.includes(ip)) data.ips.push(ip);
+    data.count = (data.count || 0) + 1;
+    try { writeCount(data); } catch (e) { console.error('Failed writing count.json', e); }
+    return res.json({ count: data.count, ip, added: true, forced: true });
+  }
+
   if (!already) {
-    data.ips.push(ip);
+    if (ip) data.ips.push(ip);
     data.count = (data.count || 0) + 1;
     try { writeCount(data); } catch (e) { console.error('Failed writing count.json', e); }
   }
