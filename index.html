@@ -257,7 +257,7 @@
                         Rol: Desarrollo backend, arquitectura REST y cron jobs con Redis
                     </div>
                     <div class="project-links">
-                        <a href="git@github.com:brandbold-Ch/Marvic_API_REST.git" target="_blank">Repositorio Git</a>
+                        <a href="https://github.com/brandbold-Ch/Marvic_API_REST" target="_blank">Repositorio Git</a>
                     </div>
                 </div>
             </article>
@@ -287,7 +287,7 @@
                         Rol: Backend developer y diseño de modelos de datos
                     </div>
                     <div class="project-links">
-                        <a href="git@github.com:brandbold-Ch/api-pets.git" target="_blank">Repositorio Git</a>
+                        <a href="https://github.com/brandbold-Ch/api-pets" target="_blank">Repositorio Git</a>
                     </div>
                 </div>
             </article>
@@ -315,7 +315,7 @@
                         Rol: Migración de datos y optimización estructural
                     </div>
                     <div class="project-links">
-                        <a href="git@github.com:brandbold-Ch/APIBoletas.git" target="_blank">Repositorio Git</a>
+                        <a href="https://github.com/brandbold-Ch/APIBoletas" target="_blank">Repositorio Git</a>
                     </div>
                 </div>
             </article>
@@ -345,7 +345,7 @@
                         Rol: Diseño de arquitectura backend e implementación
                     </div>
                     <div class="project-links">
-                        <a href="git@github.com:PABED-DEV/bocados.git" target="_blank">Repositorio Git</a>
+                        <a href="https://github.com/PABED-DEV/bocados" target="_blank">Repositorio Git</a>
                     </div>
                 </div>
             </article>
@@ -355,10 +355,15 @@
     </section>
 
     <footer>
-        © 2026 Brandbold
+        <div id="visitor" style="display:flex;flex-direction:column;gap:6px;align-items:center;">
+            <div style="font-weight:600;">© 2026 Brandbold</div>
+            <div id="visitor-counter" style="color:var(--muted);font-size:0.95rem;margin-top:0.5rem;">Visitantes: —</div>
+            <div id="visitor-ip" style="color:var(--muted);font-size:0.8rem;">IP: —</div>
+        </div>
     </footer>
 
     <script>
+        // Carousel movement (existing)
         function moveCarousel(button, direction) {
             const projectImage = button.closest('.project-image');
             const carousel = projectImage.querySelector('.carousel');
@@ -370,6 +375,83 @@
             carousel.dataset.index = index;
             carousel.style.transform = `translateX(-${index * 100}%)`;
         }
+
+        // Force external GitHub links to open in a real new tab/window to avoid SPA/router rewrite
+        document.addEventListener('click', function (e) {
+            const a = e.target.closest && e.target.closest('a[href]');
+            if (!a) return;
+            try {
+                const url = new URL(a.href);
+                if (url.hostname.endsWith('github.com')) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    // ensure safe attributes
+                    a.setAttribute('rel', 'noopener noreferrer');
+                    window.open(a.href, '_blank', 'noopener,noreferrer');
+                }
+            } catch (err) {
+                // ignore invalid URLs
+            }
+        }, {capture: true});
+
+        // Visitor counter using CountAPI (https://countapi.xyz) + localStorage to avoid duplicate increments per IP on this browser
+        (function () {
+            const counterEl = document.getElementById('visitor-counter');
+            const ipEl = document.getElementById('visitor-ip');
+            const namespace = 'brandbold-portfolio';
+            const key = 'visits';
+            const getUrl = `https://api.countapi.xyz/get/${namespace}/${key}`;
+            const hitUrl = `https://api.countapi.xyz/hit/${namespace}/${key}`;
+
+            function setCount(value) {
+                counterEl.textContent = 'Visitantes: ' + value;
+            }
+
+            function fetchCount() {
+                fetch(getUrl).then(r => r.json()).then(js => {
+                    if (js && typeof js.value !== 'undefined') setCount(js.value);
+                }).catch(() => setCount('—'));
+            }
+
+            // get visitor IP (best-effort)
+            fetch('https://api.ipify.org?format=json').then(r => r.json()).then(data => {
+                const ip = data.ip || 'desconocida';
+                ipEl.textContent = 'IP: ' + ip;
+
+                // load seen IPs from localStorage (note: this is local to the browser)
+                let seen = [];
+                try { seen = JSON.parse(localStorage.getItem('seen_ips') || '[]'); } catch (e) { seen = []; }
+
+                if (!seen.includes(ip)) {
+                    // increment remote counter once for this IP (as seen from this browser)
+                    fetch(hitUrl).then(r => r.json()).then(js => {
+                        if (js && typeof js.value !== 'undefined') setCount(js.value);
+                        seen.push(ip);
+                        try { localStorage.setItem('seen_ips', JSON.stringify(seen)); } catch (e) { }
+                    }).catch(() => {
+                        fetchCount();
+                    });
+                } else {
+                    // already seen on this browser; just read count
+                    fetchCount();
+                }
+            }).catch(() => {
+                ipEl.textContent = 'IP: —';
+                fetchCount();
+            });
+        }());
+n        // small UI/color/responsive tweaks applied at runtime (optional)
+        (function () {
+            // improve link look
+            document.querySelectorAll('.project-links a').forEach(a => {
+                a.style.background = 'rgba(37,99,235,0.08)';
+                a.style.padding = '6px 10px';
+                a.style.borderRadius = '8px';
+                a.style.display = 'inline-block';
+            });
+n            // ensure carousels initialize index
+            document.querySelectorAll('.carousel').forEach(c => { c.dataset.index = 0; c.style.transform = 'translateX(0%)'; });
+        }());
     </script>
 
 </body>
