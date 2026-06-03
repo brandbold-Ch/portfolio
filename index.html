@@ -527,14 +527,6 @@
                 }
             });
 
-            resetBtn.addEventListener('click', async () => {
-                const token = prompt('Admin token para resetear contador (oculto en servidor):');
-                if (!token) return;
-                try {
-                    const r = await fetch('/count/reset', { method: 'POST', headers: { 'x-admin-token': token } });
-                    if (!r.ok) throw new Error('no');
-                    const j = await r.json();
-        
 
             // small UI tweaks: style project links and initialize carousels
             document.querySelectorAll('.project-links a').forEach(a => {
