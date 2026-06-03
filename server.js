@@ -58,17 +58,6 @@ app.get('/count/ips', (req, res) => {
   res.json({ count: data.count || 0, ips: data.ips || [] });
 });
 
-// Reset counter (requires admin token in header 'x-admin-token')
-app.post('/count/reset', (req, res) => {
-  const token = req.headers['x-admin-token'] || '';
-  const expected = process.env.ADMIN_TOKEN || '';
-  if (!expected || token !== expected) {
-    return res.status(403).json({ error: 'forbidden' });
-  }
-  const data = { count: 0, ips: [] };
-  try { writeCount(data); } catch (e) { return res.status(500).json({ error: 'failed' }); }
-  res.json({ ok: true });
-});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

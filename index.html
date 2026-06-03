@@ -10,9 +10,10 @@
             --bg: #fbfdff; /* very light */
             --panel: #ffffff; /* white */
             --card: #f7fbfa; /* subtle off-white */
-            --text: #07243b; /* deep blue for text */
-            --muted: #556774; /* soft gray-blue */
-            --accent: #0ea5a4; /* teal accent */
+            --text: #05204a; /* deep navy for text */
+            --muted: #5b6b7a; /* soft gray-blue */
+            --accent: #ff7a59; /* warm coral accent */
+            --accent-2: #f9a825; /* warm amber for gradients */
         }
 
         * {
@@ -169,6 +170,16 @@
             margin-right: 1rem;
         }
 
+        .badge {
+            background: rgba(5,32,74,0.05);
+            color: var(--text);
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(5,32,74,0.04);
+        }
+        .badge.learn { opacity: 0.8; filter: saturate(0.6); }
+
         footer {
             text-align: center;
             padding: 2rem 1.5rem 3rem;
@@ -198,6 +209,13 @@
 
 <body>
 
+    <nav style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;max-width:1100px;margin:0 auto;background:transparent;position:sticky;top:0;z-index:50;">
+        <div style="font-weight:700;color:var(--text)">Brandon Jared Molina</div>
+        <div>
+            <a href="https://www.linkedin.com/in/brandon-jared-molina-v%C3%A1zquez-037ba3276" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;font-weight:600">LinkedIn</a>
+        </div>
+    </nav>
+
     <header>
         <h1>Brandon Jared Molina Vázquez — Ingeniero de Software</h1>
 
@@ -223,11 +241,24 @@
             </p>
         </div>
 
-        <div style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 1rem;">
+        <div style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items:center;">
             <a href="https://github.com/brandbold-Ch" target="_blank"
                 style="color: var(--accent); text-decoration: none; font-weight: 500;">GitHub</a>
             <a href="mailto:jaredbrandon970@gmail.com"
                 style="color: var(--accent); text-decoration: none; font-weight: 500;">Correo</a>
+        </div>
+
+        <div class="stack" style="margin-top:1.25rem;display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+            <span style="font-weight:600;color:var(--muted);margin-right:6px;">Stack:</span>
+            <span class="badge">JavaScript</span>
+            <span class="badge">Python</span>
+            <span class="badge">Node</span>
+            <span class="badge">FastAPI</span>
+            <span class="badge">Flask</span>
+            <span class="badge">Nest</span>
+            <span class="badge">Redis</span>
+            <span class="badge learn">Spring (aprendiendo)</span>
+            <span class="badge learn">C#/.NET (aprendiendo)</span>
         </div>
     </header>
 
@@ -364,15 +395,14 @@
         <div id="visitor" style="display:flex;flex-direction:column;gap:8px;align-items:center;">
             <div style="font-weight:600;">© 2026 Brandbold</div>
             <div id="visitor-badge" style="display:flex;align-items:center;gap:10px;">
-                <div id="visitor-counter" style="background:linear-gradient(90deg,var(--accent),#34d399);color:white;padding:8px 14px;border-radius:999px;font-weight:700;box-shadow:0 8px 28px rgba(14,165,164,0.12);">Visitantes: —</div>
+                <div id="visitor-counter" style="background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white;padding:8px 14px;border-radius:999px;font-weight:700;box-shadow:0 8px 28px rgba(255,122,89,0.12);">Visitantes: —</div>
                 <div id="visitor-status" style="color:var(--muted);font-size:0.9rem;"></div>
             </div>
             <div id="visitor-ip" style="color:var(--muted);font-size:0.85rem;">IP: —</div>
             <div style="display:flex;gap:8px;margin-top:6px;">
                 <button id="show-ips" style="background:transparent;border:1px solid var(--accent);color:var(--accent);padding:6px 10px;border-radius:8px;cursor:pointer;">Mostrar visitantes</button>
-                <button id="reset-count" style="background:var(--accent);color:white;padding:6px 10px;border-radius:8px;border:none;cursor:pointer;">Reset</button>
             </div>
-            <div id="ips-list" style="max-width:680px;word-break:break-word;color:var(--muted);font-size:0.85rem;display:none;margin-top:6px;padding:8px 12px;border-radius:8px;background:rgba(14,165,164,0.03);"></div>
+            <div id="ips-list" style="max-width:680px;word-break:break-word;color:var(--muted);font-size:0.85rem;display:none;margin-top:6px;padding:8px 12px;border-radius:8px;background:rgba(255,122,89,0.03);"></div>
         </div>
     </footer>
     <!-- Lightbox markup -->
@@ -422,7 +452,6 @@
             const statusEl = document.getElementById('visitor-status');
             const ipsListEl = document.getElementById('ips-list');
             const showIpsBtn = document.getElementById('show-ips');
-            const resetBtn = document.getElementById('reset-count');
 
             function setCount(value) {
                 counterEl.textContent = 'Visitantes: ' + value;
@@ -430,9 +459,9 @@
 
             function pulse(el) {
                 el.animate([
-                    { transform: 'scale(1)', boxShadow: '0 8px 28px rgba(14,165,164,0.12)' },
-                    { transform: 'scale(1.06)', boxShadow: '0 16px 48px rgba(14,165,164,0.18)' },
-                    { transform: 'scale(1)', boxShadow: '0 8px 28px rgba(14,165,164,0.12)' }
+                    { transform: 'scale(1)', boxShadow: '0 8px 28px rgba(255,122,89,0.12)' },
+                    { transform: 'scale(1.06)', boxShadow: '0 16px 48px rgba(255,122,89,0.18)' },
+                    { transform: 'scale(1)', boxShadow: '0 8px 28px rgba(255,122,89,0.12)' }
                 ], { duration: 700, iterations: 1 });
             }
 
@@ -509,23 +538,14 @@
                     const r = await fetch('/count/reset', { method: 'POST', headers: { 'x-admin-token': token } });
                     if (!r.ok) throw new Error('no');
                     const j = await r.json();
-                    if (j && j.ok) {
-                        setCount(0);
-                        statusEl.textContent = 'Contador reseteado';
-                        ipsListEl.style.display = 'none';
-                        alert('Contador reseteado correctamente.');
-                    }
-                } catch (e) {
-                    alert('Fallo al resetear: token inválido o servidor inaccesible.');
-                }
-            });
+        
 
             // small UI tweaks: style project links and initialize carousels
             document.querySelectorAll('.project-links a').forEach(a => {
                 a.style.padding = '6px 10px';
                 a.style.borderRadius = '8px';
                 a.style.display = 'inline-block';
-                a.style.background = 'rgba(14,165,164,0.06)';
+                a.style.background = 'rgba(255,122,89,0.06)';
                 a.style.color = 'var(--accent)';
             });
             document.querySelectorAll('.carousel').forEach(c => { c.dataset.index = 0; c.style.transform = 'translateX(0%)'; });
