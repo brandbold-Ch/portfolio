@@ -12,12 +12,16 @@ function readCount() {
     const raw = fs.readFileSync(COUNT_PATH, 'utf8');
     return JSON.parse(raw || '{"count":0,"ips":[]}');
   } catch (e) {
+    console.error('Error parsing count.json, returning default:', e.message);
     return { count: 0, ips: [] };
   }
 }
 
 function writeCount(obj) {
-  fs.writeFileSync(COUNT_PATH, JSON.stringify(obj, null, 2), 'utf8');
+  // Use atomic write to prevent another process from reading an empty/truncated file
+  const tmpPath = COUNT_PATH + `.${Date.now()}.tmp`;
+  fs.writeFileSync(tmpPath, JSON.stringify(obj, null, 2), 'utf8');
+  fs.renameSync(tmpPath, COUNT_PATH);
 }
 
 // Serve static files (index.html, assets)
