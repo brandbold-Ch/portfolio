@@ -7,26 +7,26 @@
     <title>Portfolio Backend</title>
     <style>
         :root {
-            --bg: #fbfdff; /* very light */
-            --panel: #ffffff; /* white */
-            --card: #f7fbfa; /* subtle off-white */
-            --text: #05204a; /* deep navy for text */
-            --muted: #5b6b7a; /* soft gray-blue */
-            --accent: #ff7a59; /* warm coral accent */
-            --accent-2: #f9a825; /* warm amber for gradients */
+            --bg: #f5f7fa;
+            --panel: #ffffff;
+            --card: #f8fafc;
+            --text: #1e293b;
+            --muted: #64748b;
+            --accent: #2563eb;
+            --accent-2: #3b82f6;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(180deg, #f8fafc, #eef2f7);
+            color: var(--text);
+            line-height: 1.6;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-        }
-
-        body {
-            font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(180deg, #f0fff4, #e6fff6); /* tender green gradient */
-            color: var(--text);
-            line-height: 1.6;
         }
 
         header {
@@ -75,6 +75,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 1.5rem;
+            align-items: start;
         }
 
         .project-card {
@@ -203,6 +204,38 @@
         #lb-prev{left:20px;top:50%;transform:translateY(-50%);font-size:40px}
         #lb-next{right:20px;top:50%;transform:translateY(-50%);font-size:40px}
         @media (max-width:600px){#lb-prev,#lb-next{font-size:30px;left:8px;right:8px}}
+
+        /* Estilos para Ver más / Ver menos */
+        .desc-wrap {
+            overflow: hidden;
+            position: relative;
+        }
+        .desc-wrap.collapsed {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+        .desc-wrap p {
+            margin-bottom: 0.75rem;
+        }
+        .desc-wrap p:last-child {
+            margin-bottom: 0;
+        }
+        .toggle-more-btn {
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+            text-align: left;
+            margin-top: 0.25rem;
+            display: inline-block;
+        }
+        .toggle-more-btn:hover {
+            text-decoration: underline;
+        }
         
     </style>
 </head>
@@ -385,6 +418,335 @@
         </div>
     </section>
 
+    <section>
+        <h2 class="section-title">Curiosidad Técnica</h2>
+    
+        <div class="about" style="margin-bottom: 2rem;">
+            <p>
+                Más allá del desarrollo de APIs y aplicaciones de negocio,
+                me interesa comprender cómo funcionan internamente los lenguajes,
+                frameworks y herramientas que utilizo diariamente.
+            </p>
+    
+            <p>
+                Dedico parte de mi tiempo a explorar conceptos avanzados de Python y Java,
+                estudiando mecanismos como reflexión, metaprogramación, mapeo objeto-relacional,
+                inyección de dependencias, sistemas de tipos y arquitectura de frameworks, 
+                Unit of Work, Identity Map, AOP, seguimiento de cambios y construcción dinámica de consultas.
+            </p>
+    
+            <p>
+                Como ejercicio de aprendizaje suelo replicar componentes que normalmente
+                utilizamos como cajas negras. Entre estos experimentos se encuentran
+                pequeños ORMs y mappers para Python y Java, implementaciones inspiradas
+                en patrones de frameworks modernos y proyectos personales orientados
+                a entender decisiones de diseño utilizadas en herramientas reales.
+            </p>
+    
+            <p>
+                Actualmente desarrollo <strong>NestPy</strong>, una propuesta inspirada en
+                NestJS para los ecosistemas de FastAPI y Flask, explorando conceptos
+                como módulos, contenedores de dependencias, decoradores y organización
+                estructurada de aplicaciones backend.
+            </p>
+    
+            <p>
+                Considero estos proyectos una forma de profundizar en la ingeniería
+                de software, entendiendo no solo cómo usar una herramienta,
+                sino también cómo está construida.
+            </p>
+        </div>
+
+        <div class="projects-grid">
+            <article class="project-card">
+            
+                <div class="project-image" style="height:auto;background:#0f172a;padding:1rem;overflow:auto;">
+            
+                    <pre style="margin:0;color:#e2e8f0;font-size:.78rem;"><code>
+                        EntityManager.processEntities(User.class);
+                        
+                        User user = new User(
+                            UUID.randomUUID(),
+                            "Valentina",
+                            "Fernández Soto",
+                            new Date("03/10/1990"),
+                            3127
+                        );
+                        
+                        EntityManager.persist(user);
+                        </code></pre>
+            
+                </div>
+            
+                <div class="project-body">
+                    <h3>Mini ORM para Java</h3>
+            
+                    <p>
+                        Proyecto experimental desarrollado para comprender cómo funcionan
+                        internamente herramientas como Hibernate y JPA.
+                        Implementé un sistema de persistencia basado en reflexión y
+                        anotaciones personalizadas capaz de generar esquemas de base
+                        de datos y consultas SQL a partir de clases Java.
+                    </p>
+            
+                    <p>
+                        El proyecto incluye procesamiento de anotaciones como
+                        <strong>@Table</strong>, <strong>@Column</strong>,
+                        <strong>@Id</strong> y <strong>@GeneratedValue</strong>,
+                        construcción de metadata mediante reflexión, generación automática
+                        de sentencias <strong>CREATE TABLE</strong> e
+                        <strong>INSERT</strong>, mapeo de tipos Java a SQL y ejecución
+                        dinámica mediante JDBC.
+                    </p>
+            
+                    <p>
+                        Como parte del diseño implementé un EntityManager propio,
+                        un sistema de migraciones automáticas, un generador de consultas
+                        SQL y una capa de configuración desacoplada para distintos
+                        motores de base de datos.
+                    </p>
+            
+                    <div class="project-meta">
+                        Tecnologías: Java, Reflection API, JDBC, PostgreSQL,
+                        Annotations, Query Generation
+                    </div>
+            
+                    <div class="project-links">
+                        <a href="https://github.com/brandbold-Ch/MapperJ/tree/main" target="_blank">
+                            Repositorio Git
+                        </a>
+                    </div>
+                </div>  
+            </article>
+
+            <article class="project-card">
+            
+                <div class="project-image" style="height:auto;background:#0f172a;padding:1rem;overflow:auto;">
+            
+                    <pre style="margin:0;color:#e2e8f0;font-size:.75rem;"><code>
+                        @module(
+                            controllers=[
+                                "UserController",
+                                "EmployeeController"
+                            ],
+                            providers=[
+                                "UserService",
+                                "EmployeeService"
+                            ]
+                        )
+                        class AppModule:
+                            pass
+                        
+                        nestpy = NestPyApplicationContext()
+                        
+                        for name, params in nestpy.get_controllers().items():
+                            app.comp.add_router_group(
+                                name,
+                                prefix=params.get("params").get("args")[0]
+                            )
+                        </code></pre>
+            
+                </div>
+            
+                <div class="project-body">
+            
+                    <h3>NestPy</h3>
+            
+                    <p>
+                        Framework experimental inspirado en NestJS y desarrollado sobre
+                        FastAPI y Flask con el objetivo de comprender cómo funcionan
+                        internamente los sistemas modernos de inyección de dependencias,
+                        descubrimiento de componentes y registro automático de rutas.
+                    </p>
+            
+                    <p>
+                        Implementé decoradores para módulos, controladores, servicios y
+                        endpoints, junto con un contenedor de aplicación encargado de
+                        registrar dependencias, almacenar metadatos y construir la
+                        configuración de la aplicación mediante introspección y reflexión.
+                    </p>
+            
+                    <p>
+                        El framework incorpora escaneo dinámico de clases, análisis de
+                        firmas de funciones, construcción automática de rutas, adaptación
+                        hacia FastAPI y un sistema de metadatos inspirado en la filosofía
+                        de NestJS.
+                    </p>
+            
+                    <p>
+                        Como parte de la arquitectura desarrollé componentes propios para
+                        reflexión, registro de controladores, manejo de módulos,
+                        resolución de dependencias y generación dinámica de handlers a
+                        partir de información obtenida mediante <code>inspect</code>.
+                    </p>
+            
+                    <div class="project-meta">
+                        Tecnologías: Python, FastAPI, Flask, Reflection,
+                        Dependency Injection, Decorators, Introspection,
+                        Framework Design
+                    </div>
+            
+                    <div class="project-links">
+                        <a href="https://github.com/brandbold-Ch/nest_py/tree/dev" target="_blank">
+                            Repositorio Git
+                        </a>
+                    </div>
+            
+                </div>  
+            </article>
+
+            <article class="project-card">
+            
+                <div class="project-image" style="height:auto;background:#0f172a;padding:1rem;overflow:auto;">
+            
+                    <pre style="margin:0;color:#e2e8f0;font-size:.75rem;"><code>
+                        class Customer(Model):
+                        
+                            id: str
+                            name: str
+                        
+                        customer = Customer()
+                        
+                        result = customer.get(
+                            customer_id="1001",
+                            relates=True
+                        )
+                        
+                        print(result.to_repr())
+                        </code></pre>
+            
+                </div>
+            
+                <div class="project-body">
+            
+                    <h3>DBF Mapper</h3>
+            
+                    <p>
+                        Uno de mis primeros proyectos de exploración técnica en Python,
+                        desarrollado durante mi proceso de aprendizaje de reflexión e
+                        introspección. El objetivo fue transformar archivos DBF heredados
+                        en objetos Python utilizando un modelo similar a un ORM ligero.
+                    </p>
+            
+                    <p>
+                        Implementé una capa de acceso a datos capaz de leer estructuras
+                        DBF, construir modelos dinámicamente y mapear registros a objetos
+                        Python utilizando genéricos, anotaciones de tipo y metadatos
+                        definidos mediante <code>Annotated</code>.
+                    </p>
+            
+                    <p>
+                        El proyecto incluye resolución básica de relaciones entre modelos,
+                        búsqueda dinámica por criterios, representación automática de
+                        entidades y un sistema de lectura desacoplado para interactuar
+                        con bases de datos DBF utilizadas en sistemas heredados.
+                    </p>
+            
+                    <p>
+                        Aunque fue desarrollado antes de profundizar en conceptos como
+                        metaclases, decorators avanzados y manipulación de runtime,
+                        representó uno de mis primeros acercamientos al diseño de
+                        librerías y herramientas de infraestructura en Python.
+                    </p>
+            
+                    <div class="project-meta">
+                        Tecnologías: Python, Reflection, Generics,
+                        Typing.Annotated, DBF, Introspection
+                    </div>
+            
+                    <div class="project-links">
+                        <a href="https://github.com/brandbold-Ch/DBFMapper/tree/dev" target="_blank">
+                            Repositorio Git
+                        </a>
+                    </div>
+            
+                </div>  
+            </article>
+
+            <article class="project-card">
+            
+                <div class="project-image" style="height:auto;background:#0f172a;padding:1rem;overflow:auto;">
+            
+                    <pre style="margin:0;color:#e2e8f0;font-size:.75rem;"><code>
+                                    # Keyboard Event Stream
+                        
+                                    C Listener
+                                        |
+                                        |  IPC
+                                        |  Unix Socket
+                                        v
+                        
+                                    /tmp/keyboard_ipc.sock
+                        
+                        
+                                    Python Backend
+                        
+                                    listener = Listener(
+                                        on_press=handle_press,
+                                        on_release=handle_release
+                                    )
+                        
+                                    listener.listen()
+                        
+                                    # (code, state, timestamp)
+                                    (30, 1, 1715932100)
+                                </code></pre>
+            
+                </div>
+            
+                <div class="project-body">
+            
+                    <h3>Net Keyboard</h3>
+            
+                    <p>
+                        Proyecto inspirado en herramientas como Synergy, cuyo objetivo es
+                        controlar múltiples equipos utilizando un único teclado y mouse,
+                        permitiendo compartir eventos de entrada entre diferentes máquinas
+                        sin hardware adicional.
+                    </p>
+            
+                    <p>
+                        Implementé un sistema de captura de eventos de teclado a bajo nivel
+                        mediante un listener desarrollado en C, encargado de leer los eventos
+                        directamente desde el sistema operativo y transmitirlos hacia una capa
+                        superior escrita en Python.
+                    </p>
+            
+                    <p>
+                        La comunicación entre procesos fue diseñada utilizando IPC mediante
+                        sockets Unix, creando un canal de comunicación binario donde los eventos
+                        del teclado son serializados como estructuras compactas conteniendo
+                        código de tecla, estado y timestamp.
+                    </p>
+            
+                    <p>
+                        La arquitectura separa la captura del hardware y el procesamiento de
+                        eventos, permitiendo desacoplar el componente nativo del backend Python
+                        mediante un sistema basado en listeners, callbacks y distribución de
+                        eventos.
+                    </p>
+            
+                    <p>
+                        Este proyecto fue una exploración de programación de sistemas,
+                        integración entre C y Python, comunicación entre procesos y manejo
+                        de eventos en tiempo real.
+                    </p>
+            
+                    <div class="project-meta">
+                        Tecnologías: C, Python, IPC, Unix Sockets,
+                        Binary Protocol, Event Streaming, Linux
+                    </div>
+            
+                    <div class="project-links">
+                        <a href="https://github.com/brandbold-Ch/net_keyboard/tree/linux/windows" target="_blank">
+                            Repositorio Git
+                        </a>
+                    </div>
+            
+                </div>  </article>
+        </div>
+        </section>
+
     <footer>
         <div id="visitor" style="display:flex;flex-direction:column;gap:8px;align-items:center;">
             <div style="font-weight:600;">© 2026 Brandbold</div>
@@ -518,7 +880,7 @@
                     if (!r.ok) throw new Error('no');
                     const j = await r.json();
                     ipsListEl.style.display = 'block';
-                    ipsListEl.textContent = `Visitantes únicos: ${j.count}\n` + (Array.isArray(j.ips) ? j.ips.slice(-50).reverse().join('\n') : '—');
+                    ipsListEl.textContent = `Visitas totales: ${j.count}\n` + (Array.isArray(j.ips) ? j.ips.slice(-50).map(v => `${v.ip_address} (${v.country}) - ${v.total} visitas`).join('\n') : '—');
                 } catch (e) {
                     ipsListEl.style.display = 'block';
                     ipsListEl.textContent = 'No se pudo obtener la lista desde el servidor.';
@@ -536,6 +898,31 @@
             });
             document.querySelectorAll('.carousel').forEach(c => { c.dataset.index = 0; c.style.transform = 'translateX(0%)'; });
             document.querySelectorAll('.project-card').forEach(card => { card.style.boxShadow = '0 6px 18px rgba(15, 23, 42, 0.06)'; });
+
+            // Agregar Ver más / Ver menos a las cards
+            document.querySelectorAll('.project-body').forEach(body => {
+                const paragraphs = Array.from(body.querySelectorAll('p'));
+                if (paragraphs.length > 1) {
+                    const wrap = document.createElement('div');
+                    wrap.className = 'desc-wrap collapsed';
+                    
+                    // Mover los párrafos al contenedor
+                    paragraphs.forEach(p => wrap.appendChild(p));
+                    
+                    // Insertarlo antes del project-meta
+                    const meta = body.querySelector('.project-meta');
+                    body.insertBefore(wrap, meta);
+                    
+                    const btn = document.createElement('button');
+                    btn.className = 'toggle-more-btn';
+                    btn.textContent = 'Ver más';
+                    btn.onclick = () => {
+                        wrap.classList.toggle('collapsed');
+                        btn.textContent = wrap.classList.contains('collapsed') ? 'Ver más' : 'Ver menos';
+                    };
+                    body.insertBefore(btn, meta);
+                }
+            });
         }());
 
         // Lightbox handlers

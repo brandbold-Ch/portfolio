@@ -1,70 +1,105 @@
+require('dotenv').config();
 const express = require('express');
-const fs = require('fs');
 const path = require('path');
+const { Pool } = require('pg');
+const geoip = require('geoip-lite');
 
 const app = express();
 app.use(express.json());
 
-const COUNT_PATH = path.join(__dirname, 'count.json');
+// Initialize PostgreSQL connection pool
+const pool = new Pool({
+  connectionString: process.env.URL_POSTGRES,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
 
-function readCount() {
+// Initialize database schema
+async function initDb() {
   try {
-    const raw = fs.readFileSync(COUNT_PATH, 'utf8');
-    return JSON.parse(raw || '{"count":0,"ips":[]}');
-  } catch (e) {
-    console.error('Error parsing count.json, returning default:', e.message);
-    return { count: 0, ips: [] };
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS visits (
+        ip_address VARCHAR(30) UNIQUE NOT NULL,
+        country VARCHAR(30) NOT NULL,
+        total INTEGER NOT NULL
+      );
+    `);
+    console.log('Database initialized');
+  } catch (err) {
+    console.error('Error initializing database:', err);
   }
 }
 
-function writeCount(obj) {
-  // Use atomic write to prevent another process from reading an empty/truncated file
-  const tmpPath = COUNT_PATH + `.${Date.now()}.tmp`;
-  fs.writeFileSync(tmpPath, JSON.stringify(obj, null, 2), 'utf8');
-  fs.renameSync(tmpPath, COUNT_PATH);
-}
+initDb();
 
 // Serve static files (index.html, assets)
 app.use(express.static(path.join(__dirname)));
 
-// Get current count
-app.get('/count', (req, res) => {
-  const data = readCount();
-  res.json({ count: data.count || 0 });
+// Get current count (total unique IPs)
+app.get('/count', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT SUM(total) as sum_total FROM visits');
+    res.json({ count: parseInt(result.rows[0].sum_total || 0, 10) });
+  } catch (err) {
+    console.error('Error getting count:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
-// Register a hit: increments only if IP not seen before
-app.post('/count/hit', (req, res) => {
-  const forwarded = req.headers['x-forwarded-for'];
-  let ip = '';
-  if (forwarded) ip = forwarded.split(',')[0].trim();
-  else ip = req.socket.remoteAddress || '';
-  // normalize IPv4-mapped IPv6
-  if (ip && ip.startsWith('::ffff:')) ip = ip.replace('::ffff:', '');
+// Register a hit: increments total if IP seen before, adds to DB otherwise
+app.post('/count/hit', async (req, res) => {
+  try {
+    const forwarded = req.headers['x-forwarded-for'];
+    let ip = '';
+    if (forwarded) ip = forwarded.split(',')[0].trim();
+    else ip = req.socket.remoteAddress || '';
+    
+    // normalize IPv4-mapped IPv6
+    if (ip && ip.startsWith('::ffff:')) ip = ip.replace('::ffff:', '');
+    
+    if (!ip) {
+       return res.status(400).json({ error: 'No IP found' });
+    }
 
-  const data = readCount();
-  if (!Array.isArray(data.ips)) data.ips = [];
-  if (typeof data.count !== 'number') data.count = 0;
+    const geo = geoip.lookup(ip);
+    const country = geo && geo.country ? geo.country : 'Unknown';
 
-  const already = ip && data.ips.includes(ip);
+    // Insert or update visitor
+    const query = `
+      INSERT INTO visits (ip_address, country, total)
+      VALUES ($1, $2, 1)
+      ON CONFLICT (ip_address) 
+      DO UPDATE SET total = visits.total + 1
+      RETURNING *;
+    `;
+    const result = await pool.query(query, [ip, country]);
+    const added = result.rows[0].total === 1;
 
-  if (!already) {
-    if (ip) data.ips.push(ip);
-    data.count = (data.count || 0) + 1;
-    try { writeCount(data); } catch (e) { console.error('Failed writing count.json', e); }
-    return res.json({ count: data.count, ip, added: true });
+    // Get the total unique count to send back
+    const countResult = await pool.query('SELECT SUM(total) as sum_total FROM visits');
+    const totalCount = parseInt(countResult.rows[0].sum_total || 0, 10);
+
+    return res.json({ count: totalCount, ip, added, country, total_visits: result.rows[0].total });
+  } catch (err) {
+    console.error('Error registering hit:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
-
-  // IP already registered, do not increment
-  return res.json({ count: data.count, ip, added: false });
 });
 
 // Return the list of IPs (admin)
-app.get('/count/ips', (req, res) => {
-  const data = readCount();
-  res.json({ count: data.count || 0, ips: data.ips || [] });
+app.get('/count/ips', async (req, res) => {
+  try {
+    const countResult = await pool.query('SELECT SUM(total) as sum_total FROM visits');
+    const totalCount = parseInt(countResult.rows[0].sum_total || 0, 10);
+    
+    const result = await pool.query('SELECT * FROM visits ORDER BY total DESC');
+    res.json({ count: totalCount, ips: result.rows });
+  } catch (err) {
+    console.error('Error fetching IPs:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
-
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
